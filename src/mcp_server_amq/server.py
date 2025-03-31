@@ -3,6 +3,7 @@ from mcp.server.stdio import stdio_server
 from mcp.types import (
     TextContent,
     Tool,
+    Resource,
 )
 import ssl
 from .models import (
@@ -28,7 +29,8 @@ from .handlers import (
     handle_delete_user,
     handle_list_tags,
 )
-
+from .resources import read_doc_content
+from pydantic.networks import AnyUrl
 
 async def serve() -> None:
     # Setup server
@@ -43,6 +45,26 @@ async def serve() -> None:
     logger = Logger("server.log", log_level)
     if is_log_level_exception:
         logger.warning("Wrong log_level received. Default to WARNING")
+
+
+    @server.list_resources()
+    async def list_resources() -> list[Resource]:
+        return [
+            Resource(
+                uri="file:///doc/rabbitmq_sizing_guide.txt",
+                name="AmazonMQ RabbitMQ sizing guide",
+                mimeType="text/plain"
+            )
+        ]
+
+
+    @server.read_resource()
+    async def read_resource(uri: AnyUrl) -> str:
+        if str(uri) == "file:///doc/rabbitmq_sizing_guide.txt":
+            file_content = read_doc_content("rabbitmq_sizing_guide.txt")
+            return file_content
+
+        raise ValueError("Resource not found")
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
