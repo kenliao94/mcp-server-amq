@@ -11,6 +11,53 @@ def handle_list_brokers(region: str):
     response = client.list_brokers()
     return response
 
+def handle_update_broker(
+    broker_id: str,
+    region: str,
+    auto_minor_version_upgrade: Optional[bool] = None,
+    configuration_id: Optional[str] = None,
+    configuration_revision: Optional[int] = None,
+    engine_version: Optional[str] = None,
+    host_instance_type: Optional[str] = None,
+    security_groups: Optional[List[str]] = None,
+    logs_general: Optional[bool] = None,
+    logs_audit: Optional[bool] = None
+):
+    client = boto3.client("mq", region_name=region)
+    
+    # Build update parameters dynamically based on provided arguments
+    update_params = {'BrokerId': broker_id}
+    
+    if auto_minor_version_upgrade is not None:
+        update_params['AutoMinorVersionUpgrade'] = auto_minor_version_upgrade
+    
+    if configuration_id is not None and configuration_revision is not None:
+        update_params['Configuration'] = {
+            'Id': configuration_id,
+            'Revision': configuration_revision
+        }
+    
+    if engine_version is not None:
+        update_params['EngineVersion'] = engine_version
+    
+    if host_instance_type is not None:
+        update_params['HostInstanceType'] = host_instance_type
+    
+    if security_groups is not None:
+        update_params['SecurityGroups'] = security_groups
+    
+    # Handle logs configuration if either log setting is provided
+    if logs_general is not None or logs_audit is not None:
+        logs_config = {}
+        if logs_general is not None:
+            logs_config['General'] = logs_general
+        if logs_audit is not None:
+            logs_config['Audit'] = logs_audit
+        update_params['Logs'] = logs_config
+    
+    response = client.update_broker(**update_params)
+    return response
+
 def handle_reboot_broker(broker_id: str, region: str):
     client = boto3.client("mq", region_name=region)
     response = client.reboot_broker(BrokerId=broker_id)

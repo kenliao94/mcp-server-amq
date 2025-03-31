@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, List
+from typing import Annotated, Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 class DescribeBroker(BaseModel):
@@ -11,6 +11,18 @@ class ListBrokers(BaseModel):
 class RebootBroker(BaseModel):
     broker_id: Annotated[str, Field(description="The broker ID to reboot")]
     region: Annotated[str, Field(description="The region of the broker")]
+
+class UpdateBroker(BaseModel):
+    broker_id: Annotated[str, Field(description="The broker ID to update")]
+    region: Annotated[str, Field(description="The region of the broker")]
+    auto_minor_version_upgrade: Annotated[Optional[bool], Field(description="Enables automatic upgrades to new minor versions")] = None
+    configuration_id: Annotated[Optional[str], Field(description="The configuration ID for the broker")] = None
+    configuration_revision: Annotated[Optional[int], Field(description="The revision number of the configuration")] = None
+    engine_version: Annotated[Optional[str], Field(description="The broker engine version to upgrade to")] = None
+    host_instance_type: Annotated[Optional[str], Field(description="The broker's instance type (e.g., mq.t3.micro)")] = None
+    security_groups: Annotated[Optional[List[str]], Field(description="List of security group IDs")] = None
+    logs_general: Annotated[Optional[bool], Field(description="Enables general logging")] = None
+    logs_audit: Annotated[Optional[bool], Field(description="Enables audit logging")] = None
 
 class ListUsers(BaseModel):
     broker_id: Annotated[str, Field(description="The broker ID to list users from")]

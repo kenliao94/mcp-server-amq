@@ -9,6 +9,7 @@ from .models import (
     DescribeBroker,
     ListBrokers,
     RebootBroker,
+    UpdateBroker,
     ListUsers,
     DescribeUser,
     CreateUser,
@@ -20,6 +21,7 @@ from .handlers import (
     handle_describe_broker,
     handle_list_brokers,
     handle_reboot_broker,
+    handle_update_broker,
     handle_list_users,
     handle_describe_user,
     handle_create_user,
@@ -59,6 +61,11 @@ async def serve() -> None:
                 name="reboot_broker",
                 description="""Reboot a broker in AmazonMQ""",
                 inputSchema=RebootBroker.model_json_schema(),
+            ),
+            Tool(
+                name="update_broker",
+                description="""Update a broker's configuration in AmazonMQ""",
+                inputSchema=UpdateBroker.model_json_schema(),
             ),
             Tool(
                 name="list_users",
@@ -117,6 +124,38 @@ async def serve() -> None:
             region = arguments["region"]
             try:
                 result = handle_reboot_broker(broker_id=broker_id, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "update_broker":
+            logger.debug("Executing update_broker tool")
+            broker_id = arguments["broker_id"]
+            region = arguments["region"]
+            
+            # Extract optional parameters
+            auto_minor_version_upgrade = arguments.get("auto_minor_version_upgrade")
+            configuration_id = arguments.get("configuration_id")
+            configuration_revision = arguments.get("configuration_revision")
+            engine_version = arguments.get("engine_version") 
+            host_instance_type = arguments.get("host_instance_type")
+            security_groups = arguments.get("security_groups")
+            logs_general = arguments.get("logs_general")
+            logs_audit = arguments.get("logs_audit")
+            
+            try:
+                result = handle_update_broker(
+                    broker_id=broker_id,
+                    region=region,
+                    auto_minor_version_upgrade=auto_minor_version_upgrade,
+                    configuration_id=configuration_id,
+                    configuration_revision=configuration_revision,
+                    engine_version=engine_version,
+                    host_instance_type=host_instance_type,
+                    security_groups=security_groups,
+                    logs_general=logs_general,
+                    logs_audit=logs_audit
+                )
                 return [TextContent(type="text", text=str(result))]
             except Exception as e:
                 logger.error(f"{e}")
