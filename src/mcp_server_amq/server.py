@@ -7,9 +7,25 @@ from mcp.types import (
 import ssl
 from .models import (
     DescribeBroker,
+    ListBrokers,
+    RebootBroker,
+    ListUsers,
+    DescribeUser,
+    CreateUser,
+    DeleteUser,
+    ListTags,
 )
 from .logger import Logger, LOG_LEVEL
-from .handlers import handle_describe_broker
+from .handlers import (
+    handle_describe_broker,
+    handle_list_brokers,
+    handle_reboot_broker,
+    handle_list_users,
+    handle_describe_user,
+    handle_create_user,
+    handle_delete_user,
+    handle_list_tags,
+)
 
 
 async def serve() -> None:
@@ -34,6 +50,41 @@ async def serve() -> None:
                 description="""Describe the broker status deployed on AmazonMQ""",
                 inputSchema=DescribeBroker.model_json_schema(),
             ),
+            Tool(
+                name="list_brokers",
+                description="""List all brokers in the specified region""",
+                inputSchema=ListBrokers.model_json_schema(),
+            ),
+            Tool(
+                name="reboot_broker",
+                description="""Reboot a broker in AmazonMQ""",
+                inputSchema=RebootBroker.model_json_schema(),
+            ),
+            Tool(
+                name="list_users",
+                description="""List all users for a broker in AmazonMQ""",
+                inputSchema=ListUsers.model_json_schema(),
+            ),
+            Tool(
+                name="describe_user",
+                description="""Describe a specific user of a broker in AmazonMQ""",
+                inputSchema=DescribeUser.model_json_schema(),
+            ),
+            Tool(
+                name="create_user",
+                description="""Create a new user for a broker in AmazonMQ""",
+                inputSchema=CreateUser.model_json_schema(),
+            ),
+            Tool(
+                name="delete_user",
+                description="""Delete a user from a broker in AmazonMQ""",
+                inputSchema=DeleteUser.model_json_schema(),
+            ),
+            Tool(
+                name="list_tags",
+                description="""List all tags for a given resource in AmazonMQ""",
+                inputSchema=ListTags.model_json_schema(),
+            ),
         ]
 
     @server.call_tool()
@@ -47,6 +98,88 @@ async def serve() -> None:
             region = arguments["region"]
             try:
                 result = handle_describe_broker(broker_id=broker_id, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "list_brokers":
+            logger.debug("Executing list_brokers tool")
+            region = arguments["region"]
+            try:
+                result = handle_list_brokers(region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "reboot_broker":
+            logger.debug("Executing reboot_broker tool")
+            broker_id = arguments["broker_id"]
+            region = arguments["region"]
+            try:
+                result = handle_reboot_broker(broker_id=broker_id, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "list_users":
+            logger.debug("Executing list_users tool")
+            broker_id = arguments["broker_id"]
+            region = arguments["region"]
+            try:
+                result = handle_list_users(broker_id=broker_id, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "describe_user":
+            logger.debug("Executing describe_user tool")
+            broker_id = arguments["broker_id"]
+            username = arguments["username"]
+            region = arguments["region"]
+            try:
+                result = handle_describe_user(broker_id=broker_id, username=username, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "create_user":
+            logger.debug("Executing create_user tool")
+            broker_id = arguments["broker_id"]
+            username = arguments["username"]
+            password = arguments["password"]
+            console_access = arguments.get("console_access", False)
+            groups = arguments.get("groups")
+            region = arguments["region"]
+            try:
+                result = handle_create_user(
+                    broker_id=broker_id,
+                    username=username,
+                    password=password,
+                    console_access=console_access,
+                    groups=groups,
+                    region=region
+                )
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "delete_user":
+            logger.debug("Executing delete_user tool")
+            broker_id = arguments["broker_id"]
+            username = arguments["username"]
+            region = arguments["region"]
+            try:
+                result = handle_delete_user(broker_id=broker_id, username=username, region=region)
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+        elif name == "list_tags":
+            logger.debug("Executing list_tags tool")
+            resource_arn = arguments["resource_arn"]
+            region = arguments["region"]
+            try:
+                result = handle_list_tags(resource_arn=resource_arn, region=region)
                 return [TextContent(type="text", text=str(result))]
             except Exception as e:
                 logger.error(f"{e}")
