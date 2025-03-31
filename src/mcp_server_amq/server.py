@@ -9,6 +9,7 @@ from .models import (
     DescribeBroker,
 )
 from .logger import Logger, LOG_LEVEL
+from .handlers import handle_describe_broker
 
 
 async def serve() -> None:
@@ -41,11 +42,12 @@ async def serve() -> None:
         arguments: dict
     ) -> list[TextContent]:
         if name == "describe_broker":
-            logger.debug("Executing enqueue tool")
+            logger.debug("Executing describe_broker tool")
             broker_id = arguments["broker_id"]
-
+            region = arguments["region"]
             try:
-                return [TextContent(type="text", text=str(broker_id))]
+                result = handle_describe_broker(broker_id=broker_id, region=region)
+                return [TextContent(type="text", text=str(result))]
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]

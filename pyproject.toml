@@ -23,6 +23,7 @@ dependencies = [
     "pydantic>=2.0.0",
     "readabilipy>=0.2.0",
     "requests>=2.32.3",
+    "boto3>=1.37.23",
 ]
 
 [project.scripts]
