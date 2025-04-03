@@ -1,5 +1,5 @@
 import boto3
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 def handle_describe_broker(broker_id: str, region: str):
     client = boto3.client("mq", region_name=region)
@@ -9,6 +9,34 @@ def handle_describe_broker(broker_id: str, region: str):
 def handle_list_brokers(region: str):
     client = boto3.client("mq", region_name=region)
     response = client.list_brokers()
+    return response
+
+def handle_create_broker(
+    broker_name: str,
+    engine_type: str,
+    engine_version: str,
+    host_instance_type: str,
+    deployment_mode: str,
+    publicly_accessible: bool,
+    auto_minor_version_upgrade: bool,
+    users: List[Dict[str, str]],
+    region: str = "us-east-1",
+):
+    client = boto3.client("mq", region_name=region)
+    
+    # Build create parameters
+    create_params = {
+        'BrokerName': broker_name,
+        'EngineType': engine_type,
+        'EngineVersion': engine_version,
+        'HostInstanceType': host_instance_type,
+        'DeploymentMode': deployment_mode,
+        'PubliclyAccessible': publicly_accessible,
+        'AutoMinorVersionUpgrade': auto_minor_version_upgrade,
+        'Users': users,
+    }
+    
+    response = client.create_broker(**create_params)
     return response
 
 def handle_update_broker(

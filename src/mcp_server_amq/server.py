@@ -11,6 +11,7 @@ from .models import (
     ListBrokers,
     RebootBroker,
     UpdateBroker,
+    CreateBroker,
     ListUsers,
     DescribeUser,
     CreateUser,
@@ -23,6 +24,7 @@ from .handlers import (
     handle_list_brokers,
     handle_reboot_broker,
     handle_update_broker,
+    handle_create_broker,
     handle_list_users,
     handle_describe_user,
     handle_create_user,
@@ -80,6 +82,11 @@ async def serve() -> None:
                 inputSchema=ListBrokers.model_json_schema(),
             ),
             Tool(
+                name="create_broker",
+                description="""Create a new broker in AmazonMQ""",
+                inputSchema=CreateBroker.model_json_schema(),
+            ),
+            Tool(
                 name="reboot_broker",
                 description="""Reboot a broker in AmazonMQ""",
                 inputSchema=RebootBroker.model_json_schema(),
@@ -131,6 +138,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "list_brokers":
             logger.debug("Executing list_brokers tool")
             region = arguments["region"]
@@ -140,6 +148,39 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
+        elif name == "create_broker":
+            logger.debug("Executing create_broker tool")
+            engine_type = arguments["engine_type"]
+            if engine_type == "ACTIVEMQ":
+                return [TextContent(type="text", text=str("Fail. Creating an ActiveMQ broker is not supported."))]
+            broker_name = arguments["broker_name"]
+            engine_version = arguments["engine_version"]
+            host_instance_type = arguments["host_instance_type"]
+            region = arguments["region"]
+            deployment_mode = arguments.get("deployment_mode", "SINGLE_INSTANCE")
+            publicly_accessible = arguments.get("publicly_accessible", True)
+            auto_minor_version_upgrade = arguments.get("auto_minor_version_upgrade", True)
+            username = arguments["username"]
+            password = arguments["password"]
+            
+            try:
+                result = handle_create_broker(
+                    broker_name=broker_name,
+                    engine_type=engine_type,
+                    engine_version=engine_version,
+                    host_instance_type=host_instance_type,
+                    deployment_mode=deployment_mode,
+                    publicly_accessible=publicly_accessible,
+                    auto_minor_version_upgrade=auto_minor_version_upgrade,
+                    region=region,
+                    users=[{"Username": username, "Password": password}]
+                )
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+
         elif name == "reboot_broker":
             logger.debug("Executing reboot_broker tool")
             broker_id = arguments["broker_id"]
@@ -150,6 +191,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "update_broker":
             logger.debug("Executing update_broker tool")
             broker_id = arguments["broker_id"]
@@ -182,6 +224,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "list_users":
             logger.debug("Executing list_users tool")
             broker_id = arguments["broker_id"]
@@ -192,6 +235,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "describe_user":
             logger.debug("Executing describe_user tool")
             broker_id = arguments["broker_id"]
@@ -203,6 +247,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "create_user":
             logger.debug("Executing create_user tool")
             broker_id = arguments["broker_id"]
@@ -224,6 +269,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "delete_user":
             logger.debug("Executing delete_user tool")
             broker_id = arguments["broker_id"]
@@ -235,6 +281,7 @@ async def serve() -> None:
             except Exception as e:
                 logger.error(f"{e}")
                 return [TextContent(type="text", text=str("failed"))]
+
         elif name == "list_tags":
             logger.debug("Executing list_tags tool")
             resource_arn = arguments["resource_arn"]
