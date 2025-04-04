@@ -58,7 +58,12 @@ async def serve() -> None:
                 uri="file:///doc/rabbitmq_sizing_guide.txt",
                 name="AmazonMQ RabbitMQ sizing guide",
                 mimeType="text/plain"
-            )
+            ),
+            Resource(
+                uri="file:///doc/rabbitmq_best_practices.txt",
+                name="AmazonMQ RabbitMQ best practices",
+                mimeType="text/plain"
+            ),
         ]
 
 
@@ -67,7 +72,11 @@ async def serve() -> None:
         if str(uri) == "file:///doc/rabbitmq_sizing_guide.txt":
             file_content = read_doc_content("rabbitmq_sizing_guide.txt")
             return file_content
+        elif str(uri) == "file:///doc/rabbitmq_best_practices.txt":
+            file_content = read_doc_content("rabbitmq_best_practices.txt")
+            return file_content
 
+        logger.error("Resource not found")
         raise ValueError("Resource not found")
 
     @server.list_tools()
