@@ -24,6 +24,10 @@ class UpdateBroker(BaseModel):
     logs_general: Annotated[Optional[bool], Field(description="Enables general logging")] = None
     logs_audit: Annotated[Optional[bool], Field(description="Enables audit logging")] = None
 
+class DeleteBroker(BaseModel):
+    broker_id: Annotated[str, Field(description="The broker ID to delete")]
+    region: Annotated[str, Field(description="The region of the broker")]
+
 class CreateBroker(BaseModel):
     broker_name: Annotated[str, Field(description="The name of the broker to create")]
     engine_type: Annotated[str, Field(description="The broker engine type (RABBITMQ only, ACTIVEMQ not supported)")] 
@@ -34,7 +38,7 @@ class CreateBroker(BaseModel):
     auto_minor_version_upgrade: Annotated[bool, Field(description="Whether to automatically upgrade to newer minor versions")] = True
     region: Annotated[str, Field(description="The region to create the broker in")]
     username: Annotated[str, Field(description="The username of the broker user")]
-    password: Annotated[str, Field(desciption="The password of the broker user")]
+    password: Annotated[str, Field(description="The password of the broker user")]
 
 class ListUsers(BaseModel):
     broker_id: Annotated[str, Field(description="The broker ID to list users from")]

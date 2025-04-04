@@ -12,6 +12,7 @@ from .models import (
     RebootBroker,
     UpdateBroker,
     CreateBroker,
+    DeleteBroker,
     ListUsers,
     DescribeUser,
     CreateUser,
@@ -25,6 +26,7 @@ from .handlers import (
     handle_reboot_broker,
     handle_update_broker,
     handle_create_broker,
+    handle_delete_broker,
     handle_list_users,
     handle_describe_user,
     handle_create_user,
@@ -85,6 +87,11 @@ async def serve() -> None:
                 name="create_broker",
                 description="""Create a new broker in AmazonMQ""",
                 inputSchema=CreateBroker.model_json_schema(),
+            ),
+            Tool(
+                name="delete_broker",
+                description="""Delete a broker from AmazonMQ""",
+                inputSchema=DeleteBroker.model_json_schema(),
             ),
             Tool(
                 name="reboot_broker",
@@ -176,6 +183,17 @@ async def serve() -> None:
                     region=region,
                     users=[{"Username": username, "Password": password}]
                 )
+                return [TextContent(type="text", text=str(result))]
+            except Exception as e:
+                logger.error(f"{e}")
+                return [TextContent(type="text", text=str("failed"))]
+
+        elif name == "delete_broker":
+            logger.debug("Executing delete_broker tool")
+            broker_id = arguments["broker_id"]
+            region = arguments["region"]
+            try:
+                result = handle_delete_broker(broker_id=broker_id, region=region)
                 return [TextContent(type="text", text=str(result))]
             except Exception as e:
                 logger.error(f"{e}")

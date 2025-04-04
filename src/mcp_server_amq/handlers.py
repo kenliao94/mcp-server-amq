@@ -100,6 +100,11 @@ def handle_describe_user(broker_id: str, username: str, region: str):
     client = boto3.client("mq", region_name=region)
     response = client.describe_user(BrokerId=broker_id, Username=username)
     return response
+    
+def handle_delete_broker(broker_id: str, region: str):
+    client = boto3.client("mq", region_name=region)
+    response = client.delete_broker(BrokerId=broker_id)
+    return response
 
 def handle_create_user(
     broker_id: str, 
